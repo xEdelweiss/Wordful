@@ -1,49 +1,44 @@
 <?php
 
-namespace xEdelweiss;
+namespace xEdelweiss\Wordful;
+
+use xEdelweiss\Wordful\Languages\AbstractLanguage;
 
 class Word
 {
-    const VOWELS = ['а', 'у', 'о', 'ы', 'и', 'э', 'я', 'ю', 'ё', 'е'];
     /**
      * @var string
      */
     protected $word;
 
     /**
-     * @var string
+     * @var AbstractLanguage
      */
-    protected $encoding;
+    protected $language;
 
     /**
      * Word constructor.
      *
      * @param string $word
-     * @param string $encoding
+     * @param AbstractLanguage $language
      */
-    public function __construct($word, $encoding = 'UTF-8')
+    public function __construct($word, AbstractLanguage $language)
     {
-        // specify language
-        $this->originalWord = $word;
-        $this->encoding = $encoding;
-
-        $this->word = $this->initWord($word);
+        $this->language = $language;
+        $this->word = $this->getLanguageAdapter()->normalizeWord($word);
     }
 
     /**
-     * @return int
+     * @return string
      */
+    public function toString()
+    {
+        return $this->word;
+    }
+
     public function getLettersCount()
     {
-        return mb_strlen($this->word, $this->encoding);
-    }
-
-    /**
-     * @return int
-     */
-    public function getAccentPosition()
-    {
-        return 0;
+        return $this->getLanguageAdapter()->getLettersCount($this->word);
     }
 
     /**
@@ -51,60 +46,14 @@ class Word
      */
     public function toSyllables()
     {
-        $word = $this->word;
-        $result = [];
-
-        $currentSyllable = '';
-        for ($i = 0; $i < $this->getLettersCount(); $i++) {
-            $letter = mb_substr($word, $i, 1, $this->encoding);
-            $currentSyllable .= $letter;
-
-            if (!$this->isVowel($letter)) {
-                continue;
-            }
-
-            $restPart = mb_substr($word, $i + 1, null, $this->encoding);
-
-            if (!$this->isVowelContained($restPart)) {
-                $currentSyllable .= $restPart;
-                $result[] = $currentSyllable;
-                break;
-            }
-
-            $result[] = $currentSyllable;
-            $currentSyllable = '';
-        }
-
-        return $result;
+        return $this->getLanguageAdapter()->toSyllables($this->word);
     }
 
     /**
-     * @param string $word
-     * @return bool
+     * @return AbstractLanguage
      */
-    protected function isVowelContained($word)
+    protected function getLanguageAdapter()
     {
-        $vowels = implode('|', static::VOWELS);
-        return (bool)preg_match("/({$vowels})/u", $word);
-    }
-
-    /**
-     * @param string $letter
-     * @return bool
-     */
-    protected function isVowel($letter)
-    {
-        return in_array($letter, static::VOWELS);
-    }
-
-    /**
-     * @param string $word
-     * @return string
-     */
-    protected function initWord($word)
-    {
-        $result = mb_strtolower($word, $this->encoding);
-
-        return $result;
+        return $this->language;
     }
 }

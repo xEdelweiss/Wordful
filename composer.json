@@ -14,8 +14,8 @@
     },
     "autoload": {
         "psr-4": {
-            "xEdelweiss\\" : "src/",
-            "xEdelweiss\\Tests\\" : "tests/"
+            "xEdelweiss\\Wordful\\" : "src/",
+            "xEdelweiss\\Wordful\\Tests\\" : "tests/"
         }
     }
 }
